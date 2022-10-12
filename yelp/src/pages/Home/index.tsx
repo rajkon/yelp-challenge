@@ -1,4 +1,4 @@
-import { useState,useRef, useEffect, ReactElement } from "react";
+import { useState, useRef, useEffect, ReactElement } from "react";
 import styles from "./index.module.css";
 import service from "utils/service";
 import CONSTANTS from "utils/constants";
@@ -7,39 +7,47 @@ import CONSTANTS from "utils/constants";
 import Skeleton from "components/BusinessCard/Skeleton";
 import { Grid } from "@material-ui/core";
 // import InfiniteScroll from "react-infinite-scroll-component";
-import Divider from '@material-ui/core/Divider';
+import Divider from "@material-ui/core/Divider";
 
 const Home = (): ReactElement => {
-  const businessList = useRef({});
-  const [review, setReview] = useState('');
+  const [businessList, setBusinessList] = useState<any>([]);
+  const [review, setReview] = useState("");
 
-  const [searchText, setSearchText] = useState("ice cream"); // Initial value set to 'man' to display default search results on UI
+  const [searchText, setSearchText] = useState("ice cream");
+  const [searchLocation, setSearchLocation] = useState("Alpharetta");
+
   const [currentPage, setCurrentPage] = useState(0);
 
-
-
   const handleSearchChange = (e: any) => {
-    console.log('event occured',e.target.value)
+    console.log("event occured", e.target.value);
     setSearchText(e.target.value);
   };
 
-/*   const fetchBusinesses = ({ pageParam = 1 }) =>
+  const handleSearchLocationChange = (e: any) => {
+    console.log("event occured", e.target.value);
+    setSearchLocation(e.target.value);
+  };
+
+  /*   const fetchBusinesses = ({ pageParam = 1 }) =>
     service.get(CONSTANTS.BASE_URL, {
       term: searchText,
       location: "Alpharetta"
     }); */
 
-  useEffect( ()=> {
-      console.log('chaning search');
-      service.getSearchRes('',searchText).then((resp)=>
-      businessList.current = resp);
-      console.log('businessList', businessList.current);
-      service.getReview('',{}).then((reviewResp)=>{
-        console.log({reviewResp});
-        setReview(reviewResp)});
-  },[searchText]);
-
-
+  useEffect(() => {
+    console.log("chaning search");
+    service
+      .getSearchRes("", { txt: searchText, loc: searchLocation })
+      .then((resp) => {
+        console.log("biz resp in client:", { resp });
+        setBusinessList(resp);
+      });
+    console.log("businessList", businessList);
+    //don't need seperate call for reviews. can delete this
+    // service.getReview('',{}).then((reviewResp)=>{
+    //   console.log({reviewResp});
+    //   setReview(reviewResp)});
+  }, [searchText, searchLocation]);
 
   /*
 
@@ -71,7 +79,7 @@ const Home = (): ReactElement => {
     },
   }); */
 
-/*   const BusinessListLoader = (itemCount: number): ReactElement => {
+  /*   const BusinessListLoader = (itemCount: number): ReactElement => {
     return (
       <Grid container spacing={2}>
         {[...new Array(itemCount)].map((_, i: number) => (
@@ -82,7 +90,7 @@ const Home = (): ReactElement => {
       </Grid>
     );
   }; */
- console.log('render');
+  console.log("render");
   return (
     <div className={styles.root}>
       <Grid container justifyContent="center">
@@ -92,17 +100,38 @@ const Home = (): ReactElement => {
               <input
                 name="searchText"
                 onChange={handleSearchChange}
-                defaultValue={searchText} 
+                defaultValue={searchText}
+              />
+              <input
+                name="searchLocation"
+                onChange={handleSearchLocationChange}
+                defaultValue={searchLocation}
               />
             </Grid>
           </Grid>
 
           <Grid item xs={12} className={styles.businessListContainer}>
             <h1>BUSINESS Details</h1>
-            {JSON.stringify(businessList.current)}
-            <Divider variant="middle"/>
-            <h1>Review</h1>
-            {JSON.stringify(review)}
+{/*             {JSON.stringify(businessList)} */}
+            <ul>
+
+         
+              {businessList.map((item: any, i: number) => {
+                return (
+                  <li key={i + item.name}>
+                    {Object.keys(item).map((k, i) => (
+                      <p key={i}>
+                        <span> {k}</span>
+                        <span> {item[k]}</span>
+                      </p>
+                    ))}
+                    <Divider />
+                  </li>
+                );
+              })}
+            </ul>
+            <Divider variant="middle" />
+
             {/* 
             {isLoading && BusinessListLoader(8)}
             {}

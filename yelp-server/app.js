@@ -26,6 +26,7 @@ const client = yelp.client(apiKey);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
 app.use(cors());
 /* app.get('/api', (req, res) => {
     client.search({
@@ -45,12 +46,15 @@ app.get("/api", (req, res) => {
   // businessaddress(street,city)
   //for test only
   // console.log("searchResp",JSON.stringify(searchResp));
-  //   console.log("body", req.body);
+
+  const filters = req.query;
+  console.log("txt:", filters["txt"]);
+  console.log("loc:", filters["loc"]);
 
   client
     .search({
-      term: "ice cream",
-      location: "Alpharetta",
+      term: filters["txt"],
+      location: filters["loc"],
       // offset: '0',
       // limit: '50'
     })
@@ -59,7 +63,8 @@ app.get("/api", (req, res) => {
       const businesses5 = response.jsonBody.businesses.slice(0, 5);
       //This below is for test. Need mocking tests
       // const businesses5 = searchResp.businesses.slice(0,5);
-      // console.log("len:", businesses5.length);
+    //   console.log("len:", businesses5.length);
+      console.log("len:", businesses5);
 
       const biz5Updated = [];
 
@@ -71,24 +76,27 @@ app.get("/api", (req, res) => {
         modifiedB.city = b.location.city;
         modifiedB.id = b.id;
         modifiedB.name = b.name;
+        modifiedB.alias = b.alias;
         biz5Updated.push(modifiedB);
       });
 
-      //   console.log('biz5Updated:',biz5Updated);
+      console.log("biz5Updated:", biz5Updated);
       res.send(biz5Updated);
     })
     .catch((e) => {
       console.log(e);
     });
 });
+
 app.get("/review", (req, res) => {
   //  excerpt from a review of that business
   //  name of the person that wrote thereview
   //  business information should be output in the order received from the APIresponse
   const id = "E8RJkjfdcwgtyoPMjQ_Olg";
-
+  const filters = req.query;
+  console.log("alias:", filters["alias"]);
   client
-    .reviews("jenis-splendid-ice-creams-alpharetta-2")
+    .reviews(filters["alias"])
     .then((response) => {
       // axios.get( `https://api.yelp.com/v3/businesses/${id}/reviews`,{
       //     headers: {
