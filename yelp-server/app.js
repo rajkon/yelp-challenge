@@ -51,19 +51,34 @@ app.get("/api", (req, res) => {
   console.log("txt:", filters["txt"]);
   console.log("loc:", filters["loc"]);
 
-  client
-    .search({
-      term: filters["txt"],
+  // client
+  //   .search({
+  //     term: filters["txt"],
+  //     location: filters["loc"],
+  //     // offset: '0',
+  //     // limit: '50'
+  //   })
+  axios
+  .get(`https://api.yelp.com/v3/businesses/search`, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+    params:{
+            term: filters["txt"],
       location: filters["loc"],
-      // offset: '0',
-      // limit: '50'
-    })
+    }
+  })
     .then((response) => {
       //   console.log(JSON.stringify(response.jsonBody));
-      const businesses5 = response.jsonBody.businesses.slice(0, 5);
+      // const businesses5 = response.jsonBody.businesses.slice(0, 5); //with client libarary
+
+      console.log("🚀 ~ .then ~ response.businesses", response)
+      const businesses5 = response.data.businesses.slice(0,5);  //with axios
+
+
       //This below is for test. Need mocking tests
       // const businesses5 = searchResp.businesses.slice(0,5);
-    //   console.log("len:", businesses5.length);
+      //   console.log("len:", businesses5.length);
       console.log("len:", businesses5);
 
       const biz5Updated = [];
@@ -92,20 +107,19 @@ app.get("/review", (req, res) => {
   //  excerpt from a review of that business
   //  name of the person that wrote thereview
   //  business information should be output in the order received from the APIresponse
-  const id = "E8RJkjfdcwgtyoPMjQ_Olg";
   const filters = req.query;
-  console.log("alias:", filters["alias"]);
-  client
-    .reviews(filters["alias"])
+  console.log("id:", filters["id"]);
+  const id = filters["id"];
+  // client
+  //   .reviews(filters["alias"])
+  //   .then((response) => {
+  axios
+    .get(`https://api.yelp.com/v3/businesses/${id}/reviews`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    })
     .then((response) => {
-      // axios.get( `https://api.yelp.com/v3/businesses/${id}/reviews`,{
-      //     headers: {
-      //         Authorization: `Bearer ${apiKey}`
-      //     },
-      //     params: {
-      //         id: "E8RJkjfdcwgtyoPMjQ_Olg",
-      //     }})
-      // .then((response) => {
       //   console.log(JSON.stringify(response.jsonBody));
       //   const review1 = response.jsonBody.review.slice(0, 5);
       //   console.log(review1)
@@ -119,11 +133,11 @@ app.get("/review", (req, res) => {
     // specificPartsOfReviews.push(partOfReview);
     // console.log("review1", specificPartsOfReviews);
     // res.send(specificPartsOfReviews); */
-      console.log(
-        "response.jsonBody.reviews[0].text: ",
-        response.jsonBody.reviews[0].text
-      );
-      res.send(response.jsonBody.reviews[0].text);
+      const reviews = response.data.reviews;
+      console.log({reviews})
+      const topFromListReview = reviews[0].text;
+      console.log(topFromListReview)
+      res.send(topFromListReview);
     })
     .catch((e) => {
       console.log(e);
